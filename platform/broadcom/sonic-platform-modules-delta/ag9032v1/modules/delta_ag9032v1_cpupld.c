@@ -281,7 +281,6 @@ static int __init cpld_probe(struct platform_device *pdev)
 {
     struct platform_data *pdata;
     struct i2c_adapter *parent;
-    int ret;
     int retval;
 
     pdata = pdev->dev.platform_data;
@@ -296,7 +295,7 @@ static int __init cpld_probe(struct platform_device *pdev)
         return -ENODEV;
     }
 
-    pdata[cpld].client = i2c_new_dummy(parent, pdata[cpld].reg_addr);
+    pdata[cpld].client = i2c_new_dummy_device(parent, pdata[cpld].reg_addr);
     if (!pdata[cpld].client) {
         printk(KERN_WARNING "Fail to create dummy i2c client for addr %d\n", pdata[cpld].reg_addr);
         goto error;
@@ -336,7 +335,7 @@ static int __exit cpld_remove(struct platform_device *pdev)
     return 0;
 }
 
-static struct platform_driver cpld_driver = {
+static struct platform_driver cpld_driver __refdata = {
     .probe  = cpld_probe,
     .remove = __exit_p(cpld_remove),
     .driver = {

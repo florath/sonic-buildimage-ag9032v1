@@ -9,7 +9,7 @@
 #include <linux/ctype.h>
 #include <linux/platform_device.h>
 #include <linux/i2c.h>
-#include <linux/platform_data/pca954x.h>
+#include "pca954x.h"
 #include <linux/i2c-mux.h>
 #include <linux/platform_data/i2c-mux-gpio.h>
 #include <linux/i2c/sff-8436.h>
@@ -532,7 +532,7 @@ static int __init i2c_device_probe(struct platform_device *pdev)
         return -ENODEV;
     }
 
-    pdata->client = i2c_new_device(parent, &pdata->info);
+    pdata->client = i2c_new_client_device(parent, &pdata->info);
     if (!pdata->client) {
         dev_err(&pdev->dev, "Failed to create i2c client %s at %d\n",
             pdata->info.type, pdata->parent);
@@ -561,7 +561,7 @@ static int __exit i2c_deivce_remove(struct platform_device *pdev)
 
     return 0;
 }
-static struct platform_driver i2c_device_driver = {
+static struct platform_driver i2c_device_driver __refdata = {
     .probe = i2c_device_probe,
     .remove = __exit_p(i2c_deivce_remove),
     .driver = {
@@ -675,7 +675,7 @@ static struct platform_device ag9032v1_cpld = {
     },
 };
 
-static struct swpld_attribute_data {   
+struct swpld_attribute_data {   
     int reg_addr;
     int reg_mask;
     char reg_note[150];
@@ -1607,8 +1607,6 @@ static ssize_t set_swpld_data(struct device *dev, struct device_attribute *dev_a
     struct cpld_platform_data *pdata = i2cdev->platform_data;
     unsigned char reg;
     int mask;
-    int value;
-    char note[180];
     int data;
     int val;
     u8 mask_out;
@@ -1633,7 +1631,7 @@ static ssize_t set_swpld_data(struct device *dev, struct device_attribute *dev_a
             mask = controller_interrupt_data[attr->index].reg_mask;
             break;          
         default:
-            return sprintf(buf, "%d not found", attr->index);
+            return sprintf((char *)buf, "%d not found", attr->index);
     }  
     ret = i2c_smbus_read_byte_data(pdata[system_cpld].client, reg);
     mask_out = ret & ~((u8)(1 << mask));
@@ -1847,7 +1845,7 @@ static int __init cpld_probe(struct platform_device *pdev)
         return -ENODEV;
     }
 
-    pdata[system_cpld].client = i2c_new_dummy(parent, pdata[system_cpld].reg_addr);
+    pdata[system_cpld].client = i2c_new_dummy_device(parent, pdata[system_cpld].reg_addr);
     if (!pdata[system_cpld].client) {
         printk(KERN_WARNING "Fail to create dummy i2c client for addr %d\n", pdata[system_cpld].reg_addr);
         goto error;
@@ -1964,7 +1962,7 @@ static int __exit cpld_remove(struct platform_device *pdev)
     return 0;
 }
 
-static struct platform_driver cpld_driver = {
+static struct platform_driver cpld_driver __refdata = {
     .probe  = cpld_probe,
     .remove = __exit_p(cpld_remove),
     .driver = {
@@ -2423,7 +2421,7 @@ static int __exit swpld_mux_remove(struct platform_device *pdev)
 }
 #endif
 
-static struct platform_driver swpld_mux_driver = {
+static struct platform_driver swpld_mux_driver __refdata = {
     .probe  = swpld_mux_probe,
     .remove = __exit_p(swpld_mux_remove), /* TODO */
     .driver = {
@@ -2446,7 +2444,7 @@ static int __init delta_ag9032v1_platform_init(void)
     //Use pca9547 in i2c_mux_pca954x.c
     adapter = i2c_get_adapter(BUS1); 
     //client = i2c_new_device(adapter, &i2c_info_pca9547[0]);
-    i2c_client_9547 = i2c_new_device(adapter, &i2c_info_pca9547[0]);
+    i2c_client_9547 = i2c_new_client_device(adapter, &i2c_info_pca9547[0]);
 	
     i2c_put_adapter(adapter);
 
@@ -2551,4 +2549,4 @@ module_exit(delta_ag9032v1_platform_exit);
 
 MODULE_DESCRIPTION("DNI ag9032v1 Platform Support");
 MODULE_AUTHOR("Neal Tai <neal.tai@deltaww.com>");
-MODULE_LICENSE("GPL"); 
+MODULE_LICENSE("GPL");
