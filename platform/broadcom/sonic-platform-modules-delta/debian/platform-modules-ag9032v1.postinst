@@ -1,0 +1,4 @@
+#!/bin/sh
+systemctl enable ag9032v1_platform_fancontrol.service
+systemctl enable ag9032v1_platform_led.service
+systemctl enable ag9032v1_platform_modules.service
