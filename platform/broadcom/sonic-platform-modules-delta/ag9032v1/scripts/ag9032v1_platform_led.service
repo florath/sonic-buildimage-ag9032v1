@@ -1,5 +1,6 @@
 [Unit]
 Description=ag9032v1 ledcontrol
+After=ag9032v1_platform_modules.service
 
 [Service]
 Type=simple
@@ -8,4 +9,3 @@ Restart=yes
 
 [Install]
 WantedBy=multi-user.target
-After=ag9032v1_platform_modules.service
