@@ -5,8 +5,7 @@ After=ag9032v1_platform_modules.service
 [Service]
 Type=simple
 ExecStart=/bin/bash /usr/share/sonic/device/x86_64-delta_ag9032v1-r0/fancontrol.service /usr/share/sonic/device/x86_64-delta_ag9032v1-r0/fancontrol
-Restart=yes
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
-
