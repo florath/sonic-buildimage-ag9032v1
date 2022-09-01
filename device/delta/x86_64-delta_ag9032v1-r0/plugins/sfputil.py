@@ -19,7 +19,11 @@ class SfpUtil(SfpUtilBase):
 
     EEPROM_OFFSET = 50
 
+    SFP_STATUS_INSERTED = '1'
+    SFP_STATUS_REMOVED = '0'
+
     _port_to_eeprom_mapping = {}
+    port_dict = {}
 
     @property
     def port_start(self):
@@ -42,6 +46,12 @@ class SfpUtil(SfpUtilBase):
 
         for x in range(0, self.port_end + 1):
             self._port_to_eeprom_mapping[x] = eeprom_path.format(x + self.EEPROM_OFFSET)
+
+        for x in range(self.PORT_START, self.PORTS_IN_BLOCK):
+            if self.get_presence(x):
+                self.port_dict[x] = self.SFP_STATUS_INSERTED
+            else:
+                self.port_dict[x] = self.SFP_STATUS_REMOVED
 
         SfpUtilBase.__init__(self)
 
@@ -174,10 +184,47 @@ class SfpUtil(SfpUtilBase):
 
         return True
 
-    def get_transceiver_change_event(self):
-        """
-        TODO: This function need to be implemented
-        when decide to support monitoring SFP(Xcvrd)
-        on this platform.
-        """
-        raise NotImplementedError
+    def get_transceiver_change_event(self, timeout=0):
+        start_time = time.time()
+        currernt_port_dict = {}
+        forever = False
+
+        if timeout == 0:
+            forever = True
+        elif timeout > 0:
+            timeout = timeout / float(1000) # Convert to secs
+        else:
+            print ("get_transceiver_change_event:Invalid timeout value", timeout)
+            return False, {}
+
+        end_time = start_time + timeout
+        if start_time > end_time:
+            print ('get_transceiver_change_event:' \
+                       'time wrap / invalid timeout value', timeout)
+
+            return False, {} # Time wrap or possibly incorrect timeout
+
+        while timeout >= 0:
+            # Check for OIR events and return updated port_dict
+            for x in range(self.PORT_START, self.PORTS_IN_BLOCK):
+                if self.get_presence(x):
+                    currernt_port_dict[x] = self.SFP_STATUS_INSERTED
+                else:
+                    currernt_port_dict[x] = self.SFP_STATUS_REMOVED
+            if (currernt_port_dict == self.port_dict):
+                if forever:
+                    time.sleep(1)
+                else:
+                    timeout = end_time - time.time()
+                    if timeout >= 1:
+                        time.sleep(1) # We poll at 1 second granularity
+                    else:
+                        if timeout > 0:
+                            time.sleep(timeout)
+                        return True, {}
+            else:
+                # Update reg value
+                self.port_dict = currernt_port_dict
+                return True, self.port_dict
+        print ("get_transceiver_change_event: Should not reach here.")
+        return False, {}
