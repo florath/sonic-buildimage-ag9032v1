@@ -1,0 +1,60 @@
+diff --git a/sonic_platform_base/sonic_sfp/sfputilbase.py b/sonic_platform_base/sonic_sfp/sfputilbase.py
+index 760abab..699741d 100644
+--- a/sonic_platform_base/sonic_sfp/sfputilbase.py
++++ b/sonic_platform_base/sonic_sfp/sfputilbase.py
+@@ -978,7 +978,8 @@ class SfpUtilBase(object):
+             else:
+                 return None
+ 
+-            sfp_vendor_oui_raw = self._read_eeprom_specific_bytes(sysfsfile_eeprom, (offset + XCVR_VENDOR_OUI_OFFSET), XCVR_VENDOR_OUI_WIDTH)
++            sfp_vendor_oui_raw = self._read_eeprom_specific_bytes(sysfsfile_eeprom, (offset + XCVR_VENDOR_OUI_OFFSET - 1), XCVR_VENDOR_OUI_WIDTH + 1)
++            sfp_vendor_oui_raw = sfp_vendor_oui_raw[1:]
+             if sfp_vendor_oui_raw is not None:
+                 sfp_vendor_oui_data = sfpi_obj.parse_vendor_oui(sfp_vendor_oui_raw, 0)
+             else:
+@@ -990,7 +991,8 @@ class SfpUtilBase(object):
+             else:
+                 return None
+ 
+-            sfp_dom_capability_raw = self._read_eeprom_specific_bytes(sysfsfile_eeprom, (offset + XCVR_DOM_CAPABILITY_OFFSET), XCVR_DOM_CAPABILITY_WIDTH)
++            sfp_dom_capability_raw = self._read_eeprom_specific_bytes(sysfsfile_eeprom, (offset + XCVR_DOM_CAPABILITY_OFFSET - 4), XCVR_DOM_CAPABILITY_WIDTH + 4)
++            sfp_dom_capability_raw = sfp_dom_capability_raw[4:]
+             if sfp_dom_capability_raw is not None:
+                 sfp_dom_capability_data = sfpi_obj.parse_dom_capability(sfp_dom_capability_raw, 0)
+             else:
+@@ -1114,19 +1116,22 @@ class SfpUtilBase(object):
+             else:
+                 return None
+ 
+-            dom_temperature_raw = self._read_eeprom_specific_bytes(sysfsfile_eeprom, (offset + QSFP_TEMPE_OFFSET), QSFP_TEMPE_WIDTH)
++            dom_temperature_raw = self._read_eeprom_specific_bytes(sysfsfile_eeprom, (offset + QSFP_TEMPE_OFFSET - 2), QSFP_TEMPE_WIDTH + 2)
++            dom_temperature_raw = dom_temperature_raw[2:]
+             if dom_temperature_raw is not None:
+                 dom_temperature_data = sfpd_obj.parse_temperature(dom_temperature_raw, 0)
+             else:
+                 return None
+ 
+-            dom_voltage_raw = self._read_eeprom_specific_bytes(sysfsfile_eeprom, (offset + QSFP_VOLT_OFFSET), QSFP_VOLT_WIDTH)
++            dom_voltage_raw = self._read_eeprom_specific_bytes(sysfsfile_eeprom, (offset + QSFP_VOLT_OFFSET - 2), QSFP_VOLT_WIDTH + 2)
++            dom_voltage_raw = dom_voltage_raw[2:]
+             if dom_voltage_raw is not None:
+                 dom_voltage_data = sfpd_obj.parse_voltage(dom_voltage_raw, 0)
+             else:
+                 return None
+ 
+-            qsfp_dom_rev_raw = self._read_eeprom_specific_bytes(sysfsfile_eeprom, (offset + QSFP_DOM_REV_OFFSET), QSFP_DOM_REV_WIDTH)
++            qsfp_dom_rev_raw = self._read_eeprom_specific_bytes(sysfsfile_eeprom, (offset + QSFP_DOM_REV_OFFSET - 1), QSFP_DOM_REV_WIDTH + 1)
++            qsfp_dom_rev_raw = qsfp_dom_rev_raw[1:]
+             if qsfp_dom_rev_raw is not None:
+                 qsfp_dom_rev_data = sfpd_obj.parse_sfp_dom_rev(qsfp_dom_rev_raw, 0)
+             else:
+@@ -1141,7 +1146,8 @@ class SfpUtilBase(object):
+             qsfp_dom_rev = qsfp_dom_rev_data['data']['dom_rev']['value']
+             qsfp_tx_power_support = qspf_dom_capability_data['data']['Tx_power_support']['value']
+             if (qsfp_dom_rev[0:8] != 'SFF-8636' or (qsfp_dom_rev[0:8] == 'SFF-8636' and qsfp_tx_power_support != 'on')):
+-                dom_channel_monitor_raw = self._read_eeprom_specific_bytes(sysfsfile_eeprom, (offset + QSFP_CHANNL_MON_OFFSET), QSFP_CHANNL_MON_WIDTH)
++                dom_channel_monitor_raw = self._read_eeprom_specific_bytes(sysfsfile_eeprom, (offset + QSFP_CHANNL_MON_OFFSET - 2), QSFP_CHANNL_MON_WIDTH + 2)
++                dom_channel_monitor_raw = dom_channel_monitor_raw[2:]
+                 if dom_channel_monitor_raw is not None:
+                     dom_channel_monitor_data = sfpd_obj.parse_channel_monitor_params(dom_channel_monitor_raw, 0)
+                 else:
