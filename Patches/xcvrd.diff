@@ -1,0 +1,11 @@
+--- src/sonic-platform-daemons/sonic-xcvrd/xcvrd/xcvrd.py-orig	2022-09-02 09:41:47.988000000 +0000
++++ src/sonic-platform-daemons/sonic-xcvrd/xcvrd/xcvrd.py	2022-09-02 09:41:57.256000000 +0000
+@@ -375,7 +375,7 @@
+                 else:
+                     fvs = swsscommon.FieldValuePairs([
+                         ('type', port_info_dict['type']),
+-                        ('vendor_rev', port_info_dict['vendor_rev']),
++                        ('vendor_rev', port_info_dict['hardware_rev']),
+                         ('serial', port_info_dict['serial']),
+                         ('manufacturer', port_info_dict['manufacturer']),
+                         ('model', port_info_dict['model']),
